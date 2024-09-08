@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "discord.js": "^14.16.1",
     "dotenv": "^16.0.3",
     "http": "0.0.1-security",
     "http-errors": "~1.6.3",
