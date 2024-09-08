@@ -1,0 +1,10 @@
+assets
+logs
+sslcert.pem
+sslkey.pem
+.DS_Store
+node_modules
+.env
+/build
+/ETHCI-r3f-editor
+/logs
