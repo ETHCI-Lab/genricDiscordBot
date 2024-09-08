@@ -5,6 +5,7 @@ import { sdPrompt } from "../../interfaces/sdPrompt";
 import { sdResp } from "../../interfaces/sdResp";
 import { logger } from "../../utils/log";
 import { error } from "jquery";
+import { getRandomPy } from "../../utils/getRandomPy";
 
 const { SlashCommandBuilder } = require('discord.js');
 
@@ -20,17 +21,9 @@ const formater = (info:sdResp,interaction: CommandInteraction):{emb:EmbedBuilder
 
 	const temp:Array<AttachmentBuilder> = [];
 
-	// info.images.forEach(img=>{
-	// 	let buffer = Buffer.from(img, 'base64')
-	// 	temp.push(new AttachmentBuilder(buffer,{name:`${index}image.png`}))
-	// 	index++
-	// })
-
 	for (let index = 0; index < info.images.length; index++) {
 		temp.push(new AttachmentBuilder(Buffer.from(info.images[index], 'base64'),{name:`image${index}.png`}))
 	}
-
-	// let tempImg = new AttachmentBuilder(Buffer.from(info.images[0], 'base64'),{name:`image.png`})
 	
 	const resp = new EmbedBuilder()
 	.setColor(0x212121)
@@ -38,7 +31,7 @@ const formater = (info:sdResp,interaction: CommandInteraction):{emb:EmbedBuilder
 	.setAuthor({ name: 'CWL機器人', iconURL: 'https://omg.ethci.app/images/66d72cbb0ce1e345dd729031/f060b214-4143-412b-8b9b-cfc14047b4f8__messageImage_1725727051480%201.png' })
 	.setDescription(`${interaction.user.displayName} 呼叫生成`)
 	.setImage(`attachment://image0.png`)
-	.setThumbnail('https://omg.ethci.app/images/66d72cbb0ce1e345dd729031/810b55f2-cafb-4896-aaf1-89a63319e0ab__image%203.png')
+	.setThumbnail(getRandomPy())
 	.setTimestamp()
 
 	return {
