@@ -19,24 +19,24 @@ type regiResp = resp<
 	}
 >
 
-const data = new SlashCommandBuilder().setName('regimeta').setDescription('註冊meta帳號')
+const data = new SlashCommandBuilder().setName('regiomg').setDescription('註冊omg帳號')
 	.addStringOption((option: SlashCommandStringOption) => option.setName('account').setDescription('帳號').setRequired(true))
+	.addStringOption((option: SlashCommandStringOption) => option.setName('email').setDescription('email').setRequired(true))
 	.addStringOption((option: SlashCommandStringOption) => option.setName('password').setDescription('密碼').setRequired(true))
 
-const formater = (res:regiResp,interaction:CommandInteraction) => {
+const formater = (res:string,interaction:CommandInteraction) => {
 	try {
 		const resp = new EmbedBuilder()
 		.setColor(0x212121)
-		.setTitle('註冊meta')
+		.setTitle('註冊OMG')
 		.setAuthor({ name: 'CWL機器人', iconURL: getRandomPy() })
-		.setDescription(`${res.code == "200"?"註冊成功":"註冊失敗"}`)
+		.setDescription(`註冊成功`)
 		.setThumbnail(getRandomPy())
 		.addFields(
-			{ name: "_id", value: String(res.body._id), inline: false },
-			{ name:"account", value:String(interaction.options.get("account")?.value), inline:false },
-			{ name: "password", value: String(interaction.options.get("password")?.value), inline: false },
-			{ name: "role", value: String(res.body.role), inline: true },
-			{ name: "key", value: JSON.stringify(res.body.key), inline: true },
+			{ name: "name", value: String(interaction.options.get("account")?.value), inline: true },
+			{ name:"username", value:String(interaction.options.get("account")?.value), inline:true },
+			{ name: "password", value: String(interaction.options.get("password")?.value), inline: true },
+			{ name: "email", value: String(interaction.options.get("email")?.value), inline: true },
 		)
 		.setTimestamp()
 
@@ -48,10 +48,15 @@ const formater = (res:regiResp,interaction:CommandInteraction) => {
 
 const regimeta = async (interaction: CommandInteraction) => {
 	await interaction.deferReply(); 
-	const res: regiResp = await asyncPost(process.env.METARegiEndPoint as string, {
-		name: interaction.options.get("account")?.value,
-		password: interaction.options.get("password")?.value,
-	},`Bearer${process.env.METAKEY}`);
+	const res: string = await asyncPost(process.env.OMGRegiEndPoint as string,{
+		name:interaction.options.get("account")?.value,
+		username:interaction.options.get("account")?.value,
+		email:interaction.options.get("email")?.value,
+		password:interaction.options.get("password")?.value,
+		confirm_password:interaction.options.get("password")?.value
+	}).catch(error=>{
+		interaction.editReply(`error: ${error}`)
+	})
 
 	formater(res,interaction);
 }
