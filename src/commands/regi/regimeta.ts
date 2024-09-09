@@ -7,11 +7,15 @@ import { CommandInfo } from "../../interfaces/CommandInfo";
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()
 
-const data = new SlashCommandBuilder().setName('regi').setDescription('註冊meta帳號')
+const data = new SlashCommandBuilder().setName('regimeta').setDescription('註冊meta帳號')
 .addStringOption((option:SlashCommandStringOption) =>option.setName('account').setDescription('帳號').setRequired(true))
 .addStringOption((option:SlashCommandStringOption) =>option.setName('passwword').setDescription('密碼').setRequired(true))
 
 // const api = `${process.env.sdEndPoint}/sdapi/v1/sd-models`
+
+const regimeta = ()=>{
+	
+}
 
 const info:CommandInfo = {
 	data: data,
