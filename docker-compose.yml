@@ -1,0 +1,15 @@
+version: '3'  # 使用適合的版本
+
+services:
+  app:
+    build:
+      context: .  # 指定 Dockerfile 所在的上下文目錄
+      dockerfile: Dockerfile  # (可選) 如果 Dockerfile 的名稱不為 Dockerfile，可以指定
+    volumes:
+      - .app/src/commands:/usr/src/app/src/commands       # 將主機的 ./src 映射到容器內的 /usr/src/app/src
+      - .logs:/usr/src/app/logs       # 將主機的 ./logs 映射到容器內的 /usr/src/app/logs
+      - ./model.json:/usr/src/model.json # 將主機的 ./model.json 映射到容器內的 /usr/src/model.json
+    env_file: .env  # 使用此配置文件中的所有環境變量
+    restart: always
+
+    
