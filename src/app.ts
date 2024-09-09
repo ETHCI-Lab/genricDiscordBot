@@ -3,7 +3,7 @@ import { commandRegi } from './init/commandsRegi';
 import { logger } from './utils/log';
 import { setEvent } from './init/setEvent';
 import { CommandDic } from './interfaces/CommandDic';
-import { getRandomPy } from './utils/getRandomPy';
+import { setModel } from './utils/setmodel';
 require('dotenv').config()
 
 const main = async () => {
@@ -13,6 +13,7 @@ const main = async () => {
 
   const commandDic: CommandDic = await commandRegi(rest);
   setEvent(client, commandDic);
+  // await setModel()
 
   client.on('ready', () => {
     logger.info(`Logged in as ${client.user?.tag}!`);

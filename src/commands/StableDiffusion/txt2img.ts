@@ -4,16 +4,14 @@ import { asyncPost } from "../../utils/fetch";
 import { sdPrompt } from "../../interfaces/sdPrompt";
 import { sdResp } from "../../interfaces/sdResp";
 import { logger } from "../../utils/log";
-import { error } from "jquery";
 import { getRandomPy } from "../../utils/getRandomPy";
-import { Jimp } from "jimp";
 import { getDominantColor } from "../../utils/getDominantColor";
 
 const { SlashCommandBuilder } = require('discord.js');
 
 require('dotenv').config()
 
-const data: typeof SlashCommandBuilder = new SlashCommandBuilder().setName('txt2img').setDescription('genrate img')
+const data: typeof SlashCommandBuilder = new SlashCommandBuilder().setName('txt2img').setDescription('生成圖片')
 	.addStringOption((option: SlashCommandStringOption) => option.setName('prompt').setDescription('prompt').setRequired(true))
 	.addIntegerOption((option: SlashCommandIntegerOption) => option.setName('width').setDescription('width').setRequired(true).addChoices({ name: 'm', value: 512 }, { name: 'L', value: 1024 }))
 	.addIntegerOption((option: SlashCommandIntegerOption) => option.setName('height').setDescription('height').setRequired(true).addChoices({ name: 'm', value: 512 }, { name: 'L', value: 1024 }))

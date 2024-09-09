@@ -35,7 +35,7 @@ export const commandRegi = async (rest:REST):Promise<CommandDic> => {
     }
 
     const data = await rest.put(
-        Routes.applicationCommands(process.env.CLIENT_ID as string),
+        Routes.applicationGuildCommands(process.env.CLIENT_ID as string, process.env.Guild_ID as string),
         { body: commands },
     );
 
