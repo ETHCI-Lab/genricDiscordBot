@@ -1,17 +1,17 @@
-# 使用 Node.js 官方鏡像作為基礎鏡像
+# 使用 Node.js 官方镜像作为基础镜像
 FROM node:18
 
-# 定義工作目錄
-WORKDIR /usr/src/app
+# 定义工作目录
+WORKDIR /usr/src/app/app  # 先定义工作目录
 
-# 複製 package.json 和 package-lock.json（如果存在）
-COPY package*.json ./
+# 将package.json 和 package-lock.json复制到工作目录
+COPY app/package*.json ./
 
-# 安裝應用所需的依賴
+# 安装应用所需的依赖
 RUN npm install
 
-# 複製其餘的應用程序代碼
-COPY . .
+# 复制其余的应用程序代码
+COPY app/. . 
 
-# 執行bot
+# 执行 bot
 CMD ["npm", "run", "dev"]
