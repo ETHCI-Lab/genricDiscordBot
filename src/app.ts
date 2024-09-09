@@ -16,7 +16,6 @@ const main = async () => {
 
   client.on('ready', () => {
     logger.info(`Logged in as ${client.user?.tag}!`);
-    logger.info(getRandomPy())
   });
 
   client.login(process.env.BOTTOKEN as string);
