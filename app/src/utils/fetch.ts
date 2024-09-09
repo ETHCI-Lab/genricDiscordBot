@@ -14,10 +14,15 @@ export async function asyncGet(api: string) {
     }
 }
 
-export async function asyncPost(api: string, body: {} | FormData) {
+export async function asyncPost(api: string, body: {} | FormData,key?:string) {
     const res: Response = await fetch(api, {
         method: 'POST',
-        headers:new Headers({
+        headers:new Headers(key?
+        {
+            'authorization':key,
+            'content-Type':"application/json"
+        }:
+        {
             'content-Type':"application/json"
         }),
         body: body instanceof FormData?body:JSON.stringify(body),
