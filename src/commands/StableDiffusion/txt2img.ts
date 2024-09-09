@@ -6,6 +6,8 @@ import { sdResp } from "../../interfaces/sdResp";
 import { logger } from "../../utils/log";
 import { error } from "jquery";
 import { getRandomPy } from "../../utils/getRandomPy";
+import { Jimp } from "jimp";
+import { getDominantColor } from "../../utils/getDominantColor";
 
 const { SlashCommandBuilder } = require('discord.js');
 
@@ -49,7 +51,7 @@ const data: typeof SlashCommandBuilder = new SlashCommandBuilder().setName('txt2
 	.addIntegerOption((option: SlashCommandIntegerOption) => option.setName('steps').setDescription('steps').setRequired(false))
 	.addIntegerOption((option: SlashCommandIntegerOption) => option.setName('cfg_scale').setDescription('cfg_scale').setRequired(false))
 
-const formater = (info: sdResp, interaction: CommandInteraction) => {
+const formater = async (info: sdResp, interaction: CommandInteraction) => {
 
 	const temp: Array<AttachmentBuilder> = [];
 	const emb: Array<EmbedBuilder> = []
@@ -58,12 +60,13 @@ const formater = (info: sdResp, interaction: CommandInteraction) => {
 		temp.push(new AttachmentBuilder(Buffer.from(info.images[index], 'base64'), { name: `image${index}.png` }))
 	}
 
+	const color = await getDominantColor(Buffer.from(info.images[0], 'base64'))
+
 	const args: Array<{ name: string, value: any, inline: boolean }> = []
 
 	const parsedData: Array<{ [key: string]: any }> = JSON.parse(info.info);
 
 	let count = 0;
-
 
 	Object.keys(parsedData).forEach((key) => {
 		//@ts-ignore
@@ -84,7 +87,8 @@ const formater = (info: sdResp, interaction: CommandInteraction) => {
 	try {
 		const resp = new EmbedBuilder()
 			.setURL("https://mdfk.ethci.app/")
-			.setColor(0x212121)
+			//@ts-ignore
+			.setColor(color?color:0x212121)
 			//@ts-ignore
 			.setTitle(`text to image`)
 			.setAuthor({ name: 'CWL機器人', iconURL: 'https://omg.ethci.app/images/66d72cbb0ce1e345dd729031/f060b214-4143-412b-8b9b-cfc14047b4f8__messageImage_1725727051480%201.png' })
