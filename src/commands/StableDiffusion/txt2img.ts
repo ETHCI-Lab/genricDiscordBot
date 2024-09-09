@@ -134,7 +134,7 @@ const txt2img = async (interaction: CommandInteraction) => {
 
 	const api = `${process.env.sdEndPoint}/sdapi/v1/txt2img`;
 
-	logger.info(JSON.stringify(setBody(interaction)))
+	logger.info(`${interaction.user.globalName}: ${JSON.stringify(setBody(interaction))}`)
 
 	const resp: sdResp = await asyncPost(api, setBody(interaction)).catch(error => {
 		logger.error(`api: ${error}`)

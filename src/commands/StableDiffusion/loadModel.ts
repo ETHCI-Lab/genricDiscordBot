@@ -38,6 +38,8 @@ const loadModel = async (interaction: CommandInteraction) => {
      */
     await interaction.deferReply();
 
+    logger.info(`${interaction.user.globalName}: load model: ${interaction.options.get("model")?.value}`)
+
     const res = await asyncPost(sendOption, { sd_model_checkpoint: interaction.options.get("model") ? interaction.options.get("model")?.value as string : "" }).catch(err => {
         interaction.editReply({
             embeds: [formater({
