@@ -13,7 +13,7 @@ const main = async () => {
 
   const commandDic: CommandDic = await commandRegi(rest);
   setEvent(client, commandDic);
-  // await setModel()
+  await setModel();
 
   client.on('ready', () => {
     logger.info(`Logged in as ${client.user?.tag}!`);

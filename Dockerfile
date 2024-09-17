@@ -2,7 +2,7 @@
 FROM node:18
 
 # 定义工作目录
-WORKDIR /usr/src/app/app  # 先定义工作目录
+WORKDIR /usr/src/app/app 
 
 # 将package.json 和 package-lock.json复制到工作目录
 COPY app/package*.json ./

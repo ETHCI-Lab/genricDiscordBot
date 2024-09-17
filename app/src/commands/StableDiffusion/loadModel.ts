@@ -23,7 +23,8 @@ const formater = (res: resp<string>): EmbedBuilder => {
         .setDescription('更換SD模型')
         .addFields(
             { name: "message", value: res.message },
-            { name: "訊息", value: res.body }
+            { name: "訊息", value: res.body },
+            { name: "本地模型" , value: `${String(list.length)}個` }
         )
         .setThumbnail(getRandomPy())
         .setTimestamp()

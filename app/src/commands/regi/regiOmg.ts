@@ -37,6 +37,7 @@ const formater = (res:string,interaction:CommandInteraction) => {
 			{ name:"username", value:String(interaction.options.get("account")?.value), inline:true },
 			{ name: "password", value: String(interaction.options.get("password")?.value), inline: true },
 			{ name: "email", value: String(interaction.options.get("email")?.value), inline: true },
+			{name:"info",value:JSON.stringify(res), inline: true}
 		)
 		.setTimestamp()
 

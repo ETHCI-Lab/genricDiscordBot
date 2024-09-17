@@ -4,6 +4,7 @@ import { logger } from "../../utils/log";
 import { resp } from "../../utils/resp";
 import { CommandInfo } from "../../interfaces/CommandInfo";
 import { getRandomPy } from "../../utils/getRandomPy";
+import { setModel } from "../../utils/setmodel";
 
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()
@@ -36,6 +37,8 @@ const getModels = async (interaction: CommandInteraction) => {
 	 * 延遲回應
 	 */
 	await interaction.deferReply();
+
+	await setModel()
 
 	const res = await asyncGet(api).catch(async (err) => {
 
