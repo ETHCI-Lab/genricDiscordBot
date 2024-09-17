@@ -5,6 +5,6 @@ sslkey.pem
 .DS_Store
 node_modules
 .env
-/build
+/app/build
 /ETHCI-r3f-editor
 /logs
