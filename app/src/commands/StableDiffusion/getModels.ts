@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, CommandInteraction, EmbedBuilder, Interaction } from "discord.js";
 import { asyncGet } from "../../utils/fetch";
-import { logger } from "../../utils/log";
 import { resp } from "../../utils/resp";
 import { CommandInfo } from "../../interfaces/CommandInfo";
 import { getRandomPy } from "../../utils/getRandomPy";
