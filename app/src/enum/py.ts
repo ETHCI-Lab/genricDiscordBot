@@ -10,4 +10,3 @@ export enum py{
     again =  "https://omg.ethci.app/images/66d72cbb0ce1e345dd729031/d66008e0-55a5-4234-b251-56249caff9dc__clipboard_1725819940985_image.png",
     ye = "https://omg.ethci.app/images/66d72cbb0ce1e345dd729031/c1d0a199-9ea0-4a9a-bf35-2cec36468345__clipboard_1726159593503_image.png"
 }
-}

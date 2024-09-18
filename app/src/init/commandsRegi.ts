@@ -2,15 +2,16 @@ import path from "path";
 import fs from "fs"
 import { REST, Routes } from "discord.js";
 import { logger } from "../utils/log";
-import { CommandDic } from "../interfaces/CommandDic";
+import { CommandInfo } from "../interfaces/CommandInfo";
+import { Dic } from "../interfaces/Dic";
 require('dotenv').config()
 
-export const commandRegi = async (rest:REST):Promise<CommandDic> => {
+export const commandRegi = async (rest:REST):Promise<Dic<CommandInfo>> => {
 
     const foldersPath = path.join(__dirname, "..",'commands');
     const commandFolders = fs.readdirSync(foldersPath);
     const commands = [];
-    const commandDic:CommandDic = {}
+    const commandDic:Dic<CommandInfo> = {}
 
     for (const folder of commandFolders) {
         // Grab all the command files from the commands directory you created earlier

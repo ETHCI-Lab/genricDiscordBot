@@ -1,0 +1,20 @@
+export interface VoiceChannel {
+    "type": number,
+    "guild": string,
+    "guildId": string,
+    "permissionOverwrites": Array<string>,
+    "messages": Array<string>,
+    "nsfw": false,
+    "flags": number,
+    "id": string,
+    "name": string,
+    "rawPosition": number,
+    "parentId": string,
+    "rtcRegion": string,
+    "bitrate": number,
+    "userLimit": number,
+    "videoQualityMode": string,
+    "lastMessageId": string,
+    "rateLimitPerUser": number,
+    "createdTimestamp": number
+}

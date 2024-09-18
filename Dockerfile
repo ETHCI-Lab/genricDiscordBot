@@ -10,6 +10,12 @@ COPY app/package*.json ./
 # 安装应用所需的依赖
 RUN npm install
 
+# 安装 FFmpeg
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # 复制其余的应用程序代码
 COPY app/. . 
 

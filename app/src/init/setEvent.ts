@@ -1,10 +1,10 @@
 import { Client, Events } from "discord.js";
-import { Collection } from "mongoose";
-import { CommandDic } from "../interfaces/CommandDic";
 import { logger } from "../utils/log";
 import { resp } from "../utils/resp";
+import { CommandInfo } from "../interfaces/CommandInfo";
+import { Dic } from "../interfaces/Dic";
 
-export const setEvent = (client:Client,command:CommandDic)=>{
+export const setEvent = (client:Client,command:Dic<CommandInfo>)=>{
     client.on(Events.InteractionCreate, async interaction => {
         if (!interaction.isChatInputCommand()) return;
       

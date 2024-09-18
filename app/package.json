@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@discordjs/voice": "^0.17.0",
     "discord.js": "^14.16.1",
     "dotenv": "^16.0.3",
     "fs": "^0.0.1-security",
@@ -7,7 +8,9 @@
     "http-errors": "~1.6.3",
     "https": "^1.0.0",
     "jimp": "^1.4.0",
+    "libsodium-wrappers": "^0.7.15",
     "mongoose": "^6.13.0",
+    "node-fetch": "^2.6.0",
     "node-vibrant": "^3.2.1-alpha.1",
     "path": "^0.12.7",
     "winston": "^3.8.2",
@@ -20,6 +23,7 @@
     "@types/cors": "^2.8.13",
     "@types/jasmine": "^4.3.1",
     "@types/jquery": "^3.5.16",
+    "@types/node-fetch": "^2.6.11",
     "concurrently": "^7.6.0",
     "jasmine-core": "^4.5.0",
     "karma": "^6.4.1",

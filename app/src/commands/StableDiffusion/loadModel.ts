@@ -4,13 +4,13 @@ import { logger } from "../../utils/log";
 import { resp } from "../../utils/resp";
 import { CommandInfo } from "../../interfaces/CommandInfo";
 import { getRandomPy } from "../../utils/getRandomPy";
-import fs from "fs"
+import { StateManger } from "../../utils/StateManger";
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()
 
 const sendOption = `${process.env.sdEndPoint}/sdapi/v1/options`
 
-const list: Array<{ name: string, value: string }> = JSON.parse(fs.readFileSync(process.env.modelOption as string, 'utf-8'));
+const list = StateManger.getModelOption();
 
 const data = new SlashCommandBuilder().setName('loadmodel').setDescription('更換模型').addStringOption((option: SlashCommandStringOption) => option.setName('model').setDescription('模型').setRequired(true).addChoices(list))
 
