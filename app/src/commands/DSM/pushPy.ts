@@ -1,21 +1,15 @@
 import { ChatInputCommandInteraction, CommandInteraction, EmbedBuilder, Interaction, SlashCommandStringOption, VoiceChannel } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
-import { getRandomPy } from "../../utils/getRandomPy";
-import { getPyfileInfo } from "../../utils/getPyfileInfo";
 import { loginDSM } from "../../init/loginDSM";
-import { DSMFiles } from "../../interfaces/DSMFiles";
-import { DSMresp } from "../../interfaces/DSMresp";
 import { StateManger } from "../../utils/StateManger";
-import { createAudioResource, StreamType , VoiceConnection , joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior } from '@discordjs/voice';
-import { Readable } from 'node:stream';
-import fetch from "node-fetch";
+import { joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
 import { getPyAudio } from "../../utils/getPyAudio";
 import { logger } from "../../utils/log";
 
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()
 
-const data = new SlashCommandBuilder().setName('pushmusic').setDescription('插入培宇音樂').addStringOption((option: SlashCommandStringOption) => option.setName('name').setDescription('歌名').setRequired(true))
+const data = new SlashCommandBuilder().setName('pushmusic').setDescription('推入培宇音樂').addStringOption((option: SlashCommandStringOption) => option.setName('name').setDescription('歌名').setRequired(true))
 
 const playPy = async (interaction: CommandInteraction) => {
 
@@ -41,6 +35,15 @@ const playPy = async (interaction: CommandInteraction) => {
                 connection.on("error",(error)=>{
                     logger.error(error)
                 })
+
+                connection.on(VoiceConnectionStatus.Disconnected ,()=>{
+                    logger.info("Disconnected ")
+                    controller?.clear()
+                })
+
+                if (controller?.musicList.length == 0) {
+                    player?.stop()
+                }
         
                 const resource = await getPyAudio(encodeURI(`/ETHCI/無損音檔/PeiYu Cheng/${interaction.options.get("name")?.value}`),interaction.options.get("name")?.value as string)
 
