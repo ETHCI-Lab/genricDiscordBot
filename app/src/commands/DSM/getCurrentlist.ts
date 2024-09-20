@@ -2,9 +2,7 @@ import {  CommandInteraction, EmbedBuilder,  } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
 import { getRandomPy } from "../../utils/getRandomPy";
 import { AudioResource } from '@discordjs/voice';
-import { logger } from "../../utils/log";
 import { StateManger } from "../../utils/StateManger";
-import { chunkArray } from "../../utils/ChunkArray";
 import { audioMeta } from "../../interfaces/audioMeta";
 
 const { SlashCommandBuilder } = require('discord.js');
@@ -17,10 +15,13 @@ const formater = (info:  AudioResource<unknown>[] | undefined):EmbedBuilder => {
 
     let str = ""
 
+    const currentSong = StateManger.getPlayController()?.current
+
     if (info!= undefined) {
         for (let index = 0; index < info.length; index++) {
             const meta:audioMeta = info[index].metadata as audioMeta
-            str += `${index + 1}: ${meta.name}\n`
+            const iscurrent =  currentSong?.resource == info[index]
+            str += `${iscurrent?">":""}${index + 1}: ${meta.name}\n`
         }
     }
 

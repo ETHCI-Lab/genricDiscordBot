@@ -21,18 +21,6 @@ const main = async () => {
     password: process.env.SynnologyDsmPassword as string
   })
 
-  const musiclist:Array<{ name: string, value: string }> = []
-
-  getPyfileInfo(StateManger.getDSMSid() as string,StateManger.getDSMCookie() as string).then(res=>{
-    res.data.files.forEach(file=>{
-      musiclist.push({
-        name: file.name,
-        value: file.name
-      })
-    })
-  })
-
-
   await setModel();
 
   InitAudioPlayer();

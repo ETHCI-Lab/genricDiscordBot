@@ -1,4 +1,4 @@
-import { AudioResource,AudioPlayer,AudioPlayerStatus } from '@discordjs/voice';
+import { AudioResource,AudioPlayer,AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior } from '@discordjs/voice';
 import { logger } from './log';
 import {audioMeta} from "../interfaces/audioMeta"
 
@@ -39,7 +39,14 @@ export class PlayerController{
             this.current.index = 0
             this.playMusic()
         }
-        
+    }
+
+    insertMusic(res:AudioResource<unknown>){
+        this.musicList.splice(this.current.index+1, 0, res);
+    }
+
+    insertMusicAt(res:AudioResource<unknown>,index:number){
+        this.musicList.splice(index, 0, res);
     }
 
     async playMusic(){
@@ -86,10 +93,14 @@ export class PlayerController{
     }
 
     clear(){
+
+        this.musicList = [];
+
         this.current = {
             resource:undefined,
             index:-1,
         }
+
     }
 
 }
