@@ -12,6 +12,7 @@ import { audioMeta } from "../../interfaces/audioMeta";
 import { getPyAudio } from "../../utils/getPyAudio";
 import { joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
 
+
 type list = {
     additional: {
         description: {};
@@ -64,13 +65,12 @@ const data = new SlashCommandBuilder().setName('selectmusic').setDescription('�
 ))
 
 
-const genList = async (interaction: CommandInteraction, choosedAuthor: string) => {
+const genList = async ( choosedAuthor: string) => {
 
-    let author = interaction.options.get("author")?.value == choosedAuthor ? interaction.options.get("author")?.value as string : choosedAuthor
+    const resp: DSMresp<DSMFiles> = await getPyfileInfo(StateManger.getDSMSid() as string, StateManger.getDSMCookie() as string, choosedAuthor)
+    const chunk = chunkArray(resp.data.files, 5)
 
-    const resp: DSMresp<DSMFiles> = await getPyfileInfo(StateManger.getDSMSid() as string, StateManger.getDSMCookie() as string, author)
-
-    return chunkArray(resp.data.files, 5)
+    return chunk
 }
 
 
@@ -102,8 +102,6 @@ const playPy = async (interaction: CommandInteraction, target: string,author:str
             if (controller?.musicList.length == 0) {
                 player?.stop()
             }
-
-            logger.info(`/ETHCI/無損音檔/${author}/${target}`)
 
             const resource = await getPyAudio(encodeURI(`/ETHCI/無損音檔/${author}/${target}`), target)
 
@@ -143,7 +141,6 @@ const formater = async ( interaction: CommandInteraction) => {
     let author = interaction.options.get("author")?.value as string
 
     const genmusicList = (list:list): ActionRowBuilder => {
-
         const musicBtnsrow: Array<ButtonBuilder> = []
 
         if (list[index]) {
@@ -175,7 +172,7 @@ const formater = async ( interaction: CommandInteraction) => {
                 new StringSelectMenuOptionBuilder()
                     .setLabel('鄭培宇')
                     .setDescription('鄭培宇')
-                    .setValue('peiyu'),
+                    .setValue('PeiYu Cheng'),
                 new StringSelectMenuOptionBuilder()
                     .setLabel('周杰倫')
                     .setDescription('周杰倫')
@@ -243,7 +240,7 @@ const formater = async ( interaction: CommandInteraction) => {
         });
     };
 
-    const list = await genList(interaction, author)
+    const list = await genList(author)
 
     const response = await updateResponse(list)
 
@@ -256,7 +253,7 @@ const formater = async ( interaction: CommandInteraction) => {
         // 確保回應用戶的交互
         await i.deferUpdate();
 
-        let list
+        let newlist
 
         if (i.customId === 'author') {
 
@@ -266,21 +263,22 @@ const formater = async ( interaction: CommandInteraction) => {
 
         } else if (i.customId === 'nextPage') {
 
-            list = await genList(interaction, author)
+            newlist = await genList(author)
 
-            index = (index + 1) % list.length;
+            index = (index + 1) % newlist.length;
 
         } else if (i.customId === 'prvPage') {
 
-            list = await genList(interaction, author)
+            newlist = await genList(author)
 
-            index = (index - 1 + list.length) % list.length;
+            index = (index - 1 + newlist.length) % newlist.length;
 
         } else {
             await playPy(interaction, i.customId,author)
         }
 
-        await updateResponse(await genList(interaction, author));
+        newlist = await genList(author)
+        await updateResponse(newlist);
     });
 
 }
