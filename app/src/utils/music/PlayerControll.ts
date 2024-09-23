@@ -97,6 +97,13 @@ export class PlayerController{
         return await this.playMusic()
     }
 
+    async to(index:number): Promise<audioMeta | void> {
+        if (index>-1 && index<=this.musicList.length) {
+            this.current.index = index;
+            return await this.playMusic()
+        }
+    }
+
     clear(){
 
         this.musicList = [];
