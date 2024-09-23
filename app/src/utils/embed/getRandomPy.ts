@@ -1,4 +1,4 @@
-import { py } from "../enum/py";
+import { py } from "../../enum/py";
 
 export const getRandomPy = ()=>{
     const pyValues = Object.values(py);

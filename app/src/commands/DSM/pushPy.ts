@@ -3,7 +3,7 @@ import { CommandInfo } from "../../interfaces/CommandInfo";
 import { loginDSM } from "../../init/loginDSM";
 import { StateManger } from "../../utils/StateManger";
 import { joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
-import { getPyAudio } from "../../utils/getPyAudio";
+import { getPyAudio } from "../../utils/music/getPyAudio";
 import { logger } from "../../utils/log";
 
 const { SlashCommandBuilder } = require('discord.js');
@@ -47,16 +47,15 @@ const playPy = async (interaction: CommandInteraction) => {
         
                 const resource = await getPyAudio(encodeURI(`/ETHCI/無損音檔/PeiYu Cheng/${interaction.options.get("name")?.value}`),interaction.options.get("name")?.value as string)
 
-                if (!resource) {
-                    await interaction.editReply("未找到資源");
-                }
-
-                if (player) {
+                if (player&&resource) {
                     connection.subscribe(player);
                     controller?.pushMusic(resource);
                     await interaction.editReply(`新增: ${interaction.options.get("name")?.value}`);
+
                 }else{
-                    await interaction.editReply("撥放器初始化失敗");
+
+                    await interaction.editReply("撥放器初始化失敗/未找到資源");
+
                 }
             }else{
                 await interaction.editReply("不在頻道");

@@ -2,8 +2,8 @@ import { ChatInputCommandInteraction, CommandInteraction, EmbedBuilder, Interact
 import { asyncGet } from "../../utils/fetch";
 import { resp } from "../../utils/resp";
 import { CommandInfo } from "../../interfaces/CommandInfo";
-import { getRandomPy } from "../../utils/getRandomPy";
-import { setModel } from "../../utils/setmodel";
+import { getRandomPy } from "../../utils/embed/getRandomPy";
+import { setModel } from "../../utils/sd/setmodel";
 
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()

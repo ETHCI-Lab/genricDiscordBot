@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, CommandInteraction, ComponentType, EmbedBuilder, Interaction, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
-import { getRandomPy } from "../../utils/getRandomPy";
-import { getPyfileInfo } from "../../utils/getPyfileInfo";
+import { getRandomPy } from "../../utils/embed/getRandomPy";
+import { getPyfileInfo } from "../../utils/music/getPyfileInfo";
 import { loginDSM } from "../../init/loginDSM";
 import { DSMFiles } from "../../interfaces/DSMFiles";
 import { DSMresp } from "../../interfaces/DSMresp";

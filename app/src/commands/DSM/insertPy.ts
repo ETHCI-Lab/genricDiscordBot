@@ -2,7 +2,7 @@ import { CommandInteraction, SlashCommandStringOption } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
 import { StateManger } from "../../utils/StateManger";
 import { audioMeta } from "../../interfaces/audioMeta";
-import { getPyAudio } from "../../utils/getPyAudio";
+import { getPyAudio } from "../../utils/music/getPyAudio";
 
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()
@@ -20,11 +20,15 @@ const getpy = async (interaction: CommandInteraction) => {
 
     const resource = await getPyAudio(encodeURI(`/ETHCI/無損音檔/PeiYu Cheng/${interaction.options.get("name")?.value}`),interaction.options.get("name")?.value as string)
 
-    controller?.insertMusic(resource)
+    if (resource) {
+        controller?.insertMusic(resource)
 
-    const meta:audioMeta | undefined = resource.metadata as audioMeta
-
-    await interaction.editReply(`插入${meta?.name}`);
+        const meta:audioMeta | undefined = resource.metadata as audioMeta
+    
+        await interaction.editReply(`插入${meta?.name}`);
+    }else{
+        await interaction.editReply(`無法載入資源`);
+    }
 }
 
 const info: CommandInfo = {

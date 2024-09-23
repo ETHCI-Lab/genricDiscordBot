@@ -1,5 +1,5 @@
 import { AudioPlayer,createAudioPlayer } from '@discordjs/voice';
-import { PlayerController } from './PlayerControll';
+import { PlayerController } from './music/PlayerControll';
 
 export class StateManger{
 

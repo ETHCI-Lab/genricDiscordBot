@@ -3,7 +3,7 @@ import { asyncGet, asyncPost } from "../../utils/fetch";
 import { logger } from "../../utils/log";
 import { resp } from "../../utils/resp";
 import { CommandInfo } from "../../interfaces/CommandInfo";
-import { getRandomPy } from "../../utils/getRandomPy";
+import { getRandomPy } from "../../utils/embed/getRandomPy";
 import { StateManger } from "../../utils/StateManger";
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()

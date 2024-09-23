@@ -1,6 +1,6 @@
 import {  CommandInteraction, EmbedBuilder,  } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
-import { getRandomPy } from "../../utils/getRandomPy";
+import { getRandomPy } from "../../utils/embed/getRandomPy";
 import { AudioResource } from '@discordjs/voice';
 import { StateManger } from "../../utils/StateManger";
 import { audioMeta } from "../../interfaces/audioMeta";

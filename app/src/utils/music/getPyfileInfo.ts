@@ -1,5 +1,5 @@
-import { DSMFiles } from "../interfaces/DSMFiles"
-import { DSMresp } from "../interfaces/DSMresp"
+import { DSMFiles } from "../../interfaces/DSMFiles"
+import { DSMresp } from "../../interfaces/DSMresp"
 import fetch from "node-fetch"
 
 export const getPyfileInfo = async (sid: string,cookie:string,folder_path:string): Promise<DSMresp<DSMFiles>> => {

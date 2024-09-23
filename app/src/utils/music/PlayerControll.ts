@@ -1,6 +1,6 @@
 import { AudioResource,AudioPlayer,AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior } from '@discordjs/voice';
-import { logger } from './log';
-import {audioMeta} from "../interfaces/audioMeta"
+import { logger } from '../log';
+import {audioMeta} from "../../interfaces/audioMeta"
 
 
 export class PlayerController{
@@ -57,7 +57,12 @@ export class PlayerController{
         } catch (error) {
             const meta:audioMeta = this.current.resource.metadata as audioMeta
             this.current.resource = await meta.getAudio()
-            this.player.play(this.current.resource)
+            try {
+                this.player.play(this.current.resource)
+            } catch (error) {
+                logger.error(`play music: ${error}`)
+                this.playNext()
+            }
         }
 
         const meta:audioMeta = this.current.resource.metadata as audioMeta

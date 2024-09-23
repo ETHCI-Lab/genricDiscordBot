@@ -1,7 +1,7 @@
 import fs from "fs"
-import { logger } from "./log";
-import { asyncGet } from "./fetch";
-import { StateManger } from "./StateManger";
+import { logger } from "../log";
+import { asyncGet } from "../fetch";
+import { StateManger } from "../StateManger";
 require('dotenv').config()
 
 export const setModel = async () => {

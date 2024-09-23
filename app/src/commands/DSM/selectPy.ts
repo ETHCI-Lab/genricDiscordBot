@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CacheType, ChatInputCommandInteraction, CommandInteraction, ComponentType, EmbedBuilder, Interaction, SlashCommandStringOption, StringSelectMenuBuilder, StringSelectMenuInteraction, StringSelectMenuOptionBuilder } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
-import { getRandomPy } from "../../utils/getRandomPy";
-import { getPyfileInfo } from "../../utils/getPyfileInfo";
+import { getRandomPy } from "../../utils/embed/getRandomPy";
+import { getPyfileInfo } from "../../utils/music/getPyfileInfo";
 import { loginDSM } from "../../init/loginDSM";
 import { DSMFiles } from "../../interfaces/DSMFiles";
 import { DSMresp } from "../../interfaces/DSMresp";
@@ -9,46 +9,9 @@ import { logger } from "../../utils/log";
 import { StateManger } from "../../utils/StateManger";
 import { chunkArray } from "../../utils/ChunkArray";
 import { audioMeta } from "../../interfaces/audioMeta";
-import { getPyAudio } from "../../utils/getPyAudio";
+import { getPyAudio } from "../../utils/music/getPyAudio";
 import { joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
-
-
-type list = {
-    additional: {
-        description: {};
-        indexed: boolean;
-        mount_point_type: string;
-        owner: {
-            gid: number;
-            group: string;
-            uid: number;
-            user: string;
-        };
-        perm: {
-            acl: {
-                append: boolean;
-                del: boolean;
-                exec: boolean;
-                read: boolean;
-                write: boolean;
-            };
-            is_acl_mode: boolean;
-            posix: number;
-        };
-        real_path: string;
-        size: number;
-        time: {
-            atime: number;
-            crtime: number;
-            ctime: number;
-            mtime: number;
-        };
-        type: string;
-    };
-    isdir: boolean;
-    name: string;
-    path: string;
-}[][]
+import { musicList } from "../../interfaces/musicList";
 
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()
@@ -65,7 +28,7 @@ const data = new SlashCommandBuilder().setName('selectmusic').setDescription('�
 ))
 
 
-const genList = async ( choosedAuthor: string) => {
+const genList = async (choosedAuthor: string) => {
 
     const resp: DSMresp<DSMFiles> = await getPyfileInfo(StateManger.getDSMSid() as string, StateManger.getDSMCookie() as string, choosedAuthor)
     const chunk = chunkArray(resp.data.files, 5)
@@ -74,7 +37,7 @@ const genList = async ( choosedAuthor: string) => {
 }
 
 
-const playPy = async (interaction: CommandInteraction, target: string,author:string) => {
+const playPy = async (interaction: CommandInteraction, target: string, author: string) => {
 
     const player = StateManger.getPlayer()
     const controller = StateManger.getPlayController()
@@ -105,7 +68,7 @@ const playPy = async (interaction: CommandInteraction, target: string,author:str
 
             const resource = await getPyAudio(encodeURI(`/ETHCI/無損音檔/${author}/${target}`), target)
 
-            if (player) {
+            if (player && resource) {
                 connection.subscribe(player);
                 controller?.pushMusic(resource);
             }
@@ -134,13 +97,13 @@ const getCurrentList = () => {
 }
 
 
-const formater = async ( interaction: CommandInteraction) => {
+const formater = async (interaction: CommandInteraction) => {
 
     let index = 0
 
     let author = interaction.options.get("author")?.value as string
 
-    const genmusicList = (list:list): ActionRowBuilder => {
+    const genmusicList = (list: musicList): ActionRowBuilder => {
         const musicBtnsrow: Array<ButtonBuilder> = []
 
         if (list[index]) {
@@ -152,7 +115,7 @@ const formater = async ( interaction: CommandInteraction) => {
                         .setStyle(ButtonStyle.Secondary)
                 )
             })
-        }else{
+        } else {
             musicBtnsrow.push(
                 new ButtonBuilder()
                     .setCustomId("當前音樂人沒有資料")
@@ -220,7 +183,7 @@ const formater = async ( interaction: CommandInteraction) => {
         return new ActionRowBuilder().addComponents(prvPageBtn, nextPageBtn);
     };
 
-    const updateResponse = async (list:list) => {
+    const updateResponse = async (list: musicList) => {
 
         const resp = new EmbedBuilder()
             .setColor(0x212121)
@@ -236,6 +199,7 @@ const formater = async ( interaction: CommandInteraction) => {
 
         return await interaction.editReply({
             embeds: [resp],
+            //@ts-ignore
             components: [genAuthorSelector(), genmusicList(list), createButtonRow()],
         });
     };
@@ -274,7 +238,7 @@ const formater = async ( interaction: CommandInteraction) => {
             index = (index - 1 + newlist.length) % newlist.length;
 
         } else {
-            await playPy(interaction, i.customId,author)
+            await playPy(interaction, i.customId, author)
         }
 
         newlist = await genList(author)
@@ -285,24 +249,15 @@ const formater = async ( interaction: CommandInteraction) => {
 
 const getpy = async (interaction: CommandInteraction) => {
 
-        /**
-         * 延遲回應
-         */
-        await interaction.deferReply();
+    /**
+     * 延遲回應
+     */
+    await interaction.deferReply();
 
     if (StateManger.getDSMSid() != undefined && StateManger.getDSMCookie() != undefined) {
-
-       await formater(interaction)
-
+        await formater(interaction)
     } else {
-
         await interaction.editReply("登入失敗");
-
-        await loginDSM({
-            name: process.env.SynnologyDsmUserName as string,
-            password: process.env.SynnologyDsmPassword as string
-        });
-
     }
 }
 

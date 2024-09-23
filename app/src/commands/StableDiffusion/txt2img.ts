@@ -4,8 +4,8 @@ import { asyncPost } from "../../utils/fetch";
 import { sdPrompt } from "../../interfaces/sdPrompt";
 import { sdResp } from "../../interfaces/sdResp";
 import { logger } from "../../utils/log";
-import { getRandomPy } from "../../utils/getRandomPy";
-import { getDominantColor } from "../../utils/getDominantColor";
+import { getRandomPy } from "../../utils/embed/getRandomPy";
+import { getDominantColor } from "../../utils/embed/getDominantColor";
 
 const { SlashCommandBuilder } = require('discord.js');
 

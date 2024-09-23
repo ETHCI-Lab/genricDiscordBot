@@ -1,5 +1,5 @@
 import { CommandInteraction, EmbedBuilder } from "discord.js";
-import { getRandomPy } from "../../utils/getRandomPy";
+import { getRandomPy } from "../../utils/embed/getRandomPy";
 
 const { SlashCommandBuilder } = require('discord.js');
 
