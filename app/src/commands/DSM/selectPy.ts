@@ -217,32 +217,38 @@ const formater = async (interaction: CommandInteraction) => {
         // 確保回應用戶的交互
         await i.deferUpdate();
 
-        let newlist
+        try {
+            let newlist
 
-        if (i.customId === 'author') {
+            if (i.customId === 'author') {
 
-            //@ts-ignore
-            const interaction: StringSelectMenuInteraction<CacheType> = i
-            author = interaction.values[0]
+                //@ts-ignore
+                const interaction: StringSelectMenuInteraction<CacheType> = i
+                author = interaction.values[0]
 
-        } else if (i.customId === 'nextPage') {
+            } else if (i.customId === 'nextPage') {
+
+                newlist = await genList(author)
+
+                index = (index + 1) % newlist.length;
+
+            } else if (i.customId === 'prvPage') {
+
+                newlist = await genList(author)
+
+                index = (index - 1 + newlist.length) % newlist.length;
+
+            } else {
+                if (i.customId != "當前音樂人沒有資料") {
+                    await playPy(interaction, i.customId, author)
+                }
+            }
 
             newlist = await genList(author)
-
-            index = (index + 1) % newlist.length;
-
-        } else if (i.customId === 'prvPage') {
-
-            newlist = await genList(author)
-
-            index = (index - 1 + newlist.length) % newlist.length;
-
-        } else {
-            await playPy(interaction, i.customId, author)
+            await updateResponse(newlist);
+        } catch (error) {
+            logger.info(`select: ${error}`)
         }
-
-        newlist = await genList(author)
-        await updateResponse(newlist);
     });
 
 }
