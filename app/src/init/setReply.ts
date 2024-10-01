@@ -11,8 +11,6 @@ export const setReply = (client: Client) => {
     client.on('messageCreate', async interaction => {
         const channelId = interaction.channelId
 
-        logger.info(channelIdArr?.indexOf(channelId))
-
         if (channelIdArr?.indexOf(channelId) != -1 && !interaction.author.bot) {
             if (controller) {
                 try {

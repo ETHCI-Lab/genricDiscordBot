@@ -6,14 +6,14 @@ import { Session } from "../../../interfaces/session";
 
 type info = {
     _id:string,
-    user:string,
+    userName:string,
     model:string,
     title:string,
     createdAt:string,
     updatedAt:string,
 }
 
-export const getAllSession = async(args: { [key: string]: any }):Promise<resp<info[]>> =>{
+export const getAllSession = async(args: { [key: string]: any }):Promise<info[]> =>{
     
     const api = `http://163.13.201.152:8877/Session/getAllSessions`;
 
@@ -38,7 +38,7 @@ export const getAllSession = async(args: { [key: string]: any }):Promise<resp<in
         })
     })
 
-    return infos
+    return infos.body
 }
 
 export const getAllSessionInfo:Tool = {
