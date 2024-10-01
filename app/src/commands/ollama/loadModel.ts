@@ -1,14 +1,9 @@
 import { APIApplicationCommandOptionChoice, ChatInputCommandInteraction, CommandInteraction, EmbedBuilder, Interaction, SlashCommandStringOption } from "discord.js";
-import { asyncGet, asyncPost } from "../../utils/fetch";
-import { logger } from "../../utils/log";
-import { resp } from "../../utils/resp";
 import { CommandInfo } from "../../interfaces/CommandInfo";
 import { getRandomPy } from "../../utils/embed/getRandomPy";
 import { StateManger } from "../../utils/StateManger";
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()
-
-const sendOption = `${process.env.sdEndPoint}/sdapi/v1/options`
 
 const list = StateManger.getOllamaController()?.modelList;
 

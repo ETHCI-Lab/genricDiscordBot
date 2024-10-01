@@ -1,9 +1,5 @@
-import { APIApplicationCommandOptionChoice, ChatInputCommandInteraction, CommandInteraction, EmbedBuilder, Interaction, SlashCommandStringOption } from "discord.js";
-import { asyncGet, asyncPost } from "../../utils/fetch";
-import { logger } from "../../utils/log";
-import { resp } from "../../utils/resp";
+import { CommandInteraction, SlashCommandStringOption } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
-import { getRandomPy } from "../../utils/embed/getRandomPy";
 import { StateManger } from "../../utils/StateManger";
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()

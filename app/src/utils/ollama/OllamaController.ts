@@ -22,8 +22,8 @@ export class OllamaController {
         this.mem = {}
         this.toolDic = {}
         this.toolInfoDic = {}
-        this.model = "llama3.1:latest"
-        this.replyMode = "stream"
+        this.model = "mannix/llama3-groq-tool-8b:latest"
+        this.replyMode = "await"
         
         this.client = new Ollama({
             host: this.endPoint
@@ -131,7 +131,7 @@ export class OllamaController {
 
     }
 
-    async sendChat(prompt: string, session: string,tools?:Tool[]):Promise<ChatResponse&{img?:sdResp} | null> {
+    async sendChat(prompt: string, session: string,tools?:Tool[],model?:string):Promise<ChatResponse&{img?:sdResp} | null> {
 
         let img:sdResp|undefined = undefined
 
@@ -145,7 +145,7 @@ export class OllamaController {
 
         try {
             const response = await this.client.chat({
-                model: this.model,
+                model: model?model:this.model,
                 messages: this.mem[session],
                 stream: false,
                 options:{
@@ -178,8 +178,10 @@ export class OllamaController {
                  * 有叫弄進記憶再回
                  */
                 for (const tool of response.message.tool_calls) {
+                    logger.info(JSON.stringify(tool.function.arguments))
                     const functionToCall = this.toolDic[tool.function.name];
                     const functionResponse = await functionToCall(tool.function.arguments);
+                    logger.info(JSON.stringify(functionResponse))
                     if (functionResponse.images) {
                         img = functionResponse
                     }
@@ -192,7 +194,7 @@ export class OllamaController {
                 }
 
                 const finalResponse = await this.client.chat({
-                    model: this.model,
+                    model: model?model:this.model,
                     messages: this.mem[session],
                 });
 

@@ -24,18 +24,18 @@ export const txt2imgInfo:Tool = {
     type: "function",
     function: {
         name: "txt2img",
-        description: "Call this function to Generates an image from a text prompt with an option to provide negative prompts.",
+        description: "需要時可以呼叫, 根據描述生成一張圖片, 也可以幫用戶補足沒提到細節以豐富圖片",
         parameters: {
             type: "object",
             required: [],
             properties: {
                 prompt: {
                     type: "string",
-                    description: "The text prompt based on which the image is generated."
+                    description: "描述要生成的圖片"
                 },
                 negative_prompt: {
                     type: "string",
-                    description: "Negative text prompts that depict what should not be included in the image."
+                    description: "描述要生成的圖片裡面不應該包含的東西"
                 }
             }
         }
