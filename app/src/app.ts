@@ -10,6 +10,7 @@ import { loginDSM } from './init/loginDSM';
 import { error } from 'jquery';
 import { InitAudioPlayer } from './init/InitAudioPlayer';
 import { getPyfileInfo } from './utils/music/getPyfileInfo';
+import { setReply } from './init/setReply';
 require('dotenv').config()
 
 const main = async () => {
@@ -26,10 +27,22 @@ const main = async () => {
   InitAudioPlayer();
 
   const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN as string);
-  const client: Client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] })
+  const client: Client = new Client({ 
+    intents: [
+      GatewayIntentBits.Guilds, 
+      GatewayIntentBits.GuildVoiceStates,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent
+    ] 
+  })
+
+  setReply(client);
+  await StateManger.getOllamaController()?.initModelList()
 
   const commandDic: Dic<CommandInfo> = await commandRegi(rest);
   setEvent(client, commandDic);
+  
 
   client.on('ready', () => {
     logger.info(`Logged in as ${client.user?.tag}!`);

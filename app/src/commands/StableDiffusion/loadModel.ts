@@ -12,7 +12,7 @@ const sendOption = `${process.env.sdEndPoint}/sdapi/v1/options`
 
 const list = StateManger.getModelOption();
 
-const data = new SlashCommandBuilder().setName('loadmodel').setDescription('更換模型').addStringOption((option: SlashCommandStringOption) => option.setName('model').setDescription('模型').setRequired(true).addChoices(list))
+const data = new SlashCommandBuilder().setName('loadsdmodel').setDescription('更換sd模型').addStringOption((option: SlashCommandStringOption) => option.setName('model').setDescription('模型').setRequired(true).addChoices(list))
 
 const formater = (res: resp<string>): EmbedBuilder => {
 

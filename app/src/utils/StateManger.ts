@@ -1,5 +1,8 @@
 import { AudioPlayer,createAudioPlayer } from '@discordjs/voice';
 import { PlayerController } from './music/PlayerControll';
+import { ChatCompletion } from 'openai/resources';
+import { OllamaController } from './ollama/OllamaController';
+require('dotenv').config()
 
 export class StateManger{
 
@@ -10,7 +13,8 @@ export class StateManger{
             DSMCookie:string|undefined
         },
         player:AudioPlayer | undefined,
-        playController:PlayerController | undefined
+        playController:PlayerController | undefined,
+        ollamaController:OllamaController | undefined
     }
 
     constructor(){
@@ -21,8 +25,10 @@ export class StateManger{
                 DSMCookie: undefined
             },
             player:undefined,
-            playController:undefined
+            playController:undefined,
+            ollamaController:undefined
         }
+        StateManger.info.ollamaController = new OllamaController();
     }
 
     static setModelOption(payload:Array<{ name: string, value: string }>){
@@ -60,5 +66,9 @@ export class StateManger{
 
     static getPlayController(){
         return StateManger.info.playController
+    }
+
+    static getOllamaController(){
+        return StateManger.info.ollamaController
     }
 }

@@ -15,6 +15,6 @@
     ]
   },
   "exclude": [
-    "node_modules","model.json"
+    "node_modules","model.json","build"
   ]
 }
