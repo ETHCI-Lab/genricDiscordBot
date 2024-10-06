@@ -1,5 +1,5 @@
 import { logger } from "../log";
-import { ChatResponse, Message, ModelResponse, Ollama, Tool } from "ollama";
+import { ChatResponse, Message, ModelResponse, Ollama, Tool, ToolCall } from "ollama";
 import { Dic } from "../../interfaces/Dic";
 import { toolInfo } from "../../interfaces/toolInfo";
 import { toolRoutes } from "../../init/toolRouter";
@@ -131,9 +131,10 @@ export class OllamaController {
 
     }
 
-    async sendChat(prompt: string, session: string,tools?:Tool[],model?:string):Promise<ChatResponse&{img?:sdResp} | null> {
+    async sendChat(prompt: string, session: string,tools?:Tool[],model?:string):Promise<ChatResponse&{img?:sdResp}&{toolResp:Array<ToolCall&{res:any}>} | null> {
 
         let img:sdResp|undefined = undefined
+        let toolResp: Array<ToolCall&{res:any}> = []
 
         this.pushMem(
             {
@@ -170,7 +171,8 @@ export class OllamaController {
                  */
                 return {
                     ...response,
-                    img:img
+                    img:img,
+                    toolResp:toolResp
                 }
             }else{
 
@@ -178,13 +180,18 @@ export class OllamaController {
                  * 有叫弄進記憶再回
                  */
                 for (const tool of response.message.tool_calls) {
-                    logger.info(JSON.stringify(tool.function.arguments))
                     const functionToCall = this.toolDic[tool.function.name];
                     const functionResponse = await functionToCall(tool.function.arguments);
-                    logger.info(JSON.stringify(functionResponse))
+
+                    toolResp.push({
+                        ...tool,
+                        res: functionResponse
+                    })
+
                     if (functionResponse.images) {
                         img = functionResponse
                     }
+
                     this.pushMem(
                         {
                             role: 'tool',
@@ -208,7 +215,8 @@ export class OllamaController {
 
                 return {
                     ...finalResponse,
-                    img:img
+                    img:img,
+                    toolResp:toolResp
                 }
 
             }

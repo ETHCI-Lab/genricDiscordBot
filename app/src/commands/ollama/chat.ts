@@ -1,9 +1,10 @@
-import { CommandInteraction, SlashCommandStringOption, VoiceChannel,SlashCommandBooleanOption, AttachmentBuilder,SlashCommandBuilder, APIApplicationCommandOptionChoice } from "discord.js";
+import { CommandInteraction, SlashCommandStringOption, VoiceChannel,SlashCommandBooleanOption, AttachmentBuilder,SlashCommandBuilder, APIApplicationCommandOptionChoice, EmbedBuilder, RestOrArray, APIEmbedField } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
 import { StateManger } from "../../utils/StateManger";  
 import { getToolChoice } from "../../utils/ollama/getToolChoice";
 import { Tool } from "ollama";
 import { Dic } from "../../interfaces/Dic";
+import { getRandomPy } from "../../utils/embed/getRandomPy";
 require('dotenv').config()
 
 const data = new SlashCommandBuilder().setName('chat').setDescription('跟培宇聊天')
@@ -60,10 +61,42 @@ const chat = async (interaction: CommandInteraction) => {
                 tools
             );
             if (llamaResp) {
+                const tools:Array<EmbedBuilder> = []
+
+                llamaResp.toolResp.forEach((tool)=>{
+                    let args: RestOrArray<APIEmbedField> = []
+
+                    Object.keys(tool.function.arguments).forEach(key=>{
+                        args.push({
+                            name: key,
+                            value: JSON.stringify(tool.function.arguments[key])
+                        })
+                    })
+
+                    let temp = new EmbedBuilder()
+                    .setColor(0x212121)
+                    .setTitle(tool.function.name)
+                    .setAuthor({ name: 'PYC機器人', iconURL: getRandomPy() })
+                    .addFields(
+                        args
+                    )
+                    .setTimestamp()
+
+                    tools.push(temp)
+                })
+
                 if (llamaResp.img) {
-                    await interaction.editReply({content:llamaResp.message.content,files:[new AttachmentBuilder(Buffer.from(llamaResp.img.images[0], 'base64'), { name: `image0.png` })]});
+
+                    await interaction.editReply({
+                        content:llamaResp.message.content,
+                        files:[new AttachmentBuilder(Buffer.from(llamaResp.img.images[0], 'base64'), { name: `image0.png` })],
+                        embeds:tools
+                    });
                 }else{
-                    await interaction.editReply(llamaResp.message.content);
+                    await interaction.editReply({
+                        content:llamaResp.message.content,
+                        embeds:tools
+                    });
                 }
                 
             }else{
