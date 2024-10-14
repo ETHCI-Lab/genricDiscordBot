@@ -13,7 +13,10 @@ type info = {
     updatedAt:string,
 }
 
-export const getAllSession = async(args: { [key: string]: any }):Promise<info[]> =>{
+export const getAllSession = async(args: { [key: string]: any }):Promise<{
+    body:info[],
+    text:string
+}> =>{
     
     const api = `http://163.13.201.152:8877/Session/getAllSessions`;
 
@@ -55,7 +58,10 @@ export const getAllSession = async(args: { [key: string]: any }):Promise<info[]>
 
     })
 
-    return infos.body
+    return {
+        body:infos.body,
+        text:JSON.stringify(Text)
+    }
 }
 
 export const getAllSessionInfo:Tool = {

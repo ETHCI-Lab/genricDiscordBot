@@ -11,7 +11,10 @@ export class OllamaController {
     private client
     private endPoint: string
     private model:string
-    private toolDic:Dic<(args: { [key: string]: any }) => Promise<any>>
+    private toolDic:Dic<(args: { [key: string]: any }) => Promise<{
+        body:any,
+        text:string
+    }>>
     private replyMode: "stream" | "await"
     public toolInfoDic:Dic<Tool>
     public modelList:Array<ModelResponse> = []
@@ -188,14 +191,14 @@ export class OllamaController {
                         res: functionResponse
                     })
 
-                    if (functionResponse.images) {
-                        img = functionResponse
+                    if (functionResponse.body.images) {
+                        img = functionResponse.body
                     }
 
                     this.pushMem(
                         {
                             role: 'tool',
-                            content: JSON.stringify(functionResponse)
+                            content: functionResponse.text
                         }, session
                     )
                 }

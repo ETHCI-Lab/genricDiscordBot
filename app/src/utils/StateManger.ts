@@ -2,6 +2,7 @@ import { AudioPlayer,createAudioPlayer } from '@discordjs/voice';
 import { PlayerController } from './music/PlayerControll';
 import { ChatCompletion } from 'openai/resources';
 import { OllamaController } from './ollama/OllamaController';
+import puppeteer, { Browser, Page } from 'puppeteer';
 require('dotenv').config()
 
 export class StateManger{
@@ -15,6 +16,8 @@ export class StateManger{
         player:AudioPlayer | undefined,
         playController:PlayerController | undefined,
         ollamaController:OllamaController | undefined
+        browser:Browser|undefined,
+        pages:Page[]
     }
 
     constructor(){
@@ -26,9 +29,12 @@ export class StateManger{
             },
             player:undefined,
             playController:undefined,
-            ollamaController:undefined
+            ollamaController:undefined,
+            browser:undefined,
+            pages:[]
         }
         StateManger.info.ollamaController = new OllamaController();
+        
     }
 
     static setModelOption(payload:Array<{ name: string, value: string }>){
@@ -70,5 +76,9 @@ export class StateManger{
 
     static getOllamaController(){
         return StateManger.info.ollamaController
+    }
+
+    static getBrowser(){
+        return StateManger.info.browser
     }
 }

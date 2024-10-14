@@ -3,7 +3,10 @@ import { sdResp } from "../../../interfaces/sdResp"
 import { asyncPost } from "../../fetch"
 require('dotenv').config()
 
-export const txt2img = async(args: { [key: string]: any }):Promise<sdResp> =>{
+export const txt2img = async(args: { [key: string]: any }):Promise<{
+    body:sdResp,
+    text:string
+}> =>{
     
     const api = `${process.env.sdEndPoint}/sdapi/v1/txt2img`;
 
@@ -17,7 +20,10 @@ export const txt2img = async(args: { [key: string]: any }):Promise<sdResp> =>{
 		negative_prompt: negative_prompt
     })
     
-    return resp
+    return {
+        body:resp,
+        text:JSON.stringify(resp)
+    }
 }
 
 export const txt2imgInfo:Tool = {

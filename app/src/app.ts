@@ -7,11 +7,9 @@ import { Dic } from './interfaces/Dic';
 import { CommandInfo } from './interfaces/CommandInfo';
 import { StateManger } from './utils/StateManger';
 import { loginDSM } from './init/loginDSM';
-import { error } from 'jquery';
 import { InitAudioPlayer } from './init/InitAudioPlayer';
-import { getPyfileInfo } from './utils/music/getPyfileInfo';
 import { setReply } from './init/setReply';
-import { webPageReader } from './utils/ollama/tools/webReader';
+import { initBrowser } from './init/initBrowser';
 require('dotenv').config()
 
 const main = async () => {
@@ -24,6 +22,8 @@ const main = async () => {
   })
 
   await setModel();
+
+  await initBrowser();
 
   InitAudioPlayer();
 
@@ -59,10 +59,7 @@ const main = async () => {
   })
 
   client.login(process.env.BOTTOKEN as string);
+
 }
 
 main()
-
-webPageReader({
-  url:"https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API/Using_Fetch"
-})
