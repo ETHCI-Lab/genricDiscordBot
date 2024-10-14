@@ -11,6 +11,7 @@ import { error } from 'jquery';
 import { InitAudioPlayer } from './init/InitAudioPlayer';
 import { getPyfileInfo } from './utils/music/getPyfileInfo';
 import { setReply } from './init/setReply';
+import { webPageReader } from './utils/ollama/tools/webReader';
 require('dotenv').config()
 
 const main = async () => {
@@ -61,3 +62,7 @@ const main = async () => {
 }
 
 main()
+
+webPageReader({
+  url:"https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API/Using_Fetch"
+})

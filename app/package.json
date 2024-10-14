@@ -1,13 +1,17 @@
 {
   "dependencies": {
     "@discordjs/voice": "^0.17.0",
+    "@types/html-to-text": "^9.0.4",
+    "@types/jsdom": "^21.1.7",
     "discord.js": "^14.16.1",
     "dotenv": "^16.0.3",
     "fs": "^0.0.1-security",
+    "html-to-text": "^9.0.5",
     "http": "0.0.1-security",
     "http-errors": "~1.6.3",
     "https": "^1.0.0",
     "jimp": "^1.4.0",
+    "jsdom": "^25.0.1",
     "libsodium-wrappers": "^0.7.15",
     "mongoose": "^6.13.0",
     "node-fetch": "^2.6.0",
