@@ -96,12 +96,10 @@ const getpy = async (interaction: CommandInteraction) => {
      * 延遲回應
      */
     await interaction.deferReply();
+    const musiclist: Array<{ name: string, value: string }> = []
+    const list = await getPyfileInfo("PeiYu Cheng")
 
-    if (StateManger.getDSMSid() != undefined && StateManger.getDSMCookie() != undefined) {
-
-        const musiclist: Array<{ name: string, value: string }> = []
-        const list = await getPyfileInfo(StateManger.getDSMSid() as string, StateManger.getDSMCookie() as string,"PeiYu Cheng")
-
+    if (list) {
         list.data.files.forEach(file => {
             musiclist.push({
                 name: file.name,
@@ -110,17 +108,15 @@ const getpy = async (interaction: CommandInteraction) => {
         })
 
         formater(list, interaction)
-
-    } else {
-
+    }else{
         await interaction.editReply("登入失敗");
 
         await loginDSM({
             name: process.env.SynnologyDsmUserName as string,
             password: process.env.SynnologyDsmPassword as string
         });
-
     }
+
 }
 
 const info: CommandInfo = {
@@ -129,12 +125,3 @@ const info: CommandInfo = {
 }
 
 module.exports = info;
-
-
-
-// "time": {
-//     "atime": 1726673928,
-//     "crtime": 1718905860,
-//     "ctime": 1718905865,
-//     "mtime": 1718905794
-// },

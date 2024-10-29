@@ -30,7 +30,7 @@ const data = new SlashCommandBuilder().setName('selectmusic').setDescription('é
 
 const genList = async (choosedAuthor: string) => {
 
-    const resp: DSMresp<DSMFiles> = await getPyfileInfo(StateManger.getDSMSid() as string, StateManger.getDSMCookie() as string, choosedAuthor)
+    const resp: DSMresp<DSMFiles> = await getPyfileInfo(choosedAuthor) as DSMresp<DSMFiles>
     const chunk = chunkArray(resp.data.files, 5)
 
     return chunk

@@ -58,7 +58,7 @@ const main = async () => {
     logger.error(error)
   })
 
-  client.login(process.env.BOTTOKEN as string);
+  // client.login(process.env.BOTTOKEN as string);
 
 }
 

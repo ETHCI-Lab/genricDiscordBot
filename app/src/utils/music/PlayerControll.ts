@@ -1,11 +1,23 @@
 import { AudioResource,AudioPlayer,AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior } from '@discordjs/voice';
 import { logger } from '../log';
 import {audioMeta} from "../../interfaces/audioMeta"
+import { asyncPost } from '../fetch';
+import { DSMFile } from '../../interfaces/DSMFile';
+import { StateManger } from '../StateManger';
+import { getPyfileInfo } from './getPyfileInfo';
+import { DSMFiles } from '../../interfaces/DSMFiles';
+import { DSMresp } from '../../interfaces/DSMresp';
+import { appendFile, appendFileSync } from 'fs';
+import { Dic } from '../../interfaces/Dic';
+import { getMusics } from './getMusics';
 
 
 export class PlayerController{
 
-    public musicList:Array<AudioResource<unknown>>;
+    public musicQueue:Array<AudioResource<unknown>>;
+
+    public musicList:Dic<Array<{name:string,path:string}>>;
+
 
     public player:AudioPlayer;
 
@@ -15,14 +27,15 @@ export class PlayerController{
     }
 
     constructor(player:AudioPlayer){
-        this.musicList = [];
+        this.musicQueue = [];
+        this.musicList = {}
         this.player = player;
         this.current = {
             resource:undefined,
             index:-1,
         }
         player.on(AudioPlayerStatus.Idle,()=>{
-            if (this.musicList.length!=0) {
+            if (this.musicQueue.length!=0) {
                 this.playNext()
             }
         })
@@ -30,11 +43,11 @@ export class PlayerController{
 
     pushMusic(res:AudioResource<unknown>){
 
-        if (this.musicList.length!=0) {
-            this.musicList.push(res)
+        if (this.musicQueue.length!=0) {
+            this.musicQueue.push(res)
         }else{
 
-            this.musicList.push(res)
+            this.musicQueue.push(res)
 
             this.current.index = 0
             this.playMusic()
@@ -42,15 +55,15 @@ export class PlayerController{
     }
 
     insertMusic(res:AudioResource<unknown>){
-        this.musicList.splice(this.current.index+1, 0, res);
+        this.musicQueue.splice(this.current.index+1, 0, res);
     }
 
     insertMusicAt(res:AudioResource<unknown>,index:number){
-        this.musicList.splice(index, 0, res);
+        this.musicQueue.splice(index, 0, res);
     }
 
     async playMusic(){
-        this.current.resource = this.musicList[this.current.index]
+        this.current.resource = this.musicQueue[this.current.index]
     
         try {
             this.player.play(this.current.resource)
@@ -72,7 +85,7 @@ export class PlayerController{
 
     async playNext(): Promise<audioMeta> {
 
-        if (this.current.index!=this.musicList.length-1) {
+        if (this.current.index!=this.musicQueue.length-1) {
 
             this.current.index+=1;
 
@@ -91,22 +104,37 @@ export class PlayerController{
             this.current.index-=1;
 
         }else{
-            this.current.index = this.musicList.length-1;
+            this.current.index = this.musicQueue.length-1;
         }
 
         return await this.playMusic()
     }
 
     async to(index:number): Promise<audioMeta | void> {
-        if (index>-1 && index<=this.musicList.length) {
+        if (index>-1 && index<=this.musicQueue.length) {
             this.current.index = index;
             return await this.playMusic()
         }
     }
 
+    async getSinger(){
+        
+        const data:DSMresp<DSMFiles>|undefined = await getPyfileInfo() ;
+
+        if (data) {
+            await Promise.all(data.data.files.map(async (dir)=>{
+                const list = await getMusics(dir.path)
+                this.musicList[dir.path] = list
+            }))
+
+        } 
+
+        appendFileSync("../test3.json",JSON.stringify(this.musicList))
+    }
+
     clear(){
 
-        this.musicList = [];
+        this.musicQueue = [];
 
         this.current = {
             resource:undefined,
