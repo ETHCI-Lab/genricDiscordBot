@@ -19,6 +19,7 @@
     "ollama": "^0.5.9",
     "openai": "^4.65.0",
     "path": "^0.12.7",
+    "puppeteer": "^23.6.0",
     "winston": "^3.8.2",
     "winston-daily-rotate-file": "^4.7.1",
     "puppeteer": "^23.5.3"

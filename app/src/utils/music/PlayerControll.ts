@@ -1,11 +1,31 @@
-import { AudioResource,AudioPlayer,AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior } from '@discordjs/voice';
+import { AudioResource,AudioPlayer,AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior, VoiceConnection } from '@discordjs/voice';
 import { logger } from '../log';
 import {audioMeta} from "../../interfaces/audioMeta"
+import { asyncPost } from '../fetch';
+import { DSMFile } from '../../interfaces/DSMFile';
+import { StateManger } from '../StateManger';
+import { getPyfileInfo } from './getPyfileInfo';
+import { DSMFiles } from '../../interfaces/DSMFiles';
+import { DSMresp } from '../../interfaces/DSMresp';
+import { appendFile, appendFileSync } from 'fs';
+import { Dic } from '../../interfaces/Dic';
+import { getMusics } from './getMusics';
 
 
 export class PlayerController{
 
-    public musicList:Array<AudioResource<unknown>>;
+    public musicQueue:Array<AudioResource<unknown>>;
+
+    public authorQueue:Array<DSMFile>;
+
+    public currentArthor:DSMFile|undefined;
+
+    public authorList:Array<DSMFile>;
+
+    public musicDic:Dic<Array<{name:string,path:string}>>;
+
+    public connection:VoiceConnection|undefined ;
+
 
     public player:AudioPlayer;
 
@@ -15,14 +35,17 @@ export class PlayerController{
     }
 
     constructor(player:AudioPlayer){
-        this.musicList = [];
+        this.musicQueue = [];
+        this.authorList = [];
+        this.authorQueue = [];
+        this.musicDic = {};
         this.player = player;
         this.current = {
             resource:undefined,
             index:-1,
         }
         player.on(AudioPlayerStatus.Idle,()=>{
-            if (this.musicList.length!=0) {
+            if (this.musicQueue.length!=0) {
                 this.playNext()
             }
         })
@@ -30,11 +53,11 @@ export class PlayerController{
 
     pushMusic(res:AudioResource<unknown>){
 
-        if (this.musicList.length!=0) {
-            this.musicList.push(res)
+        if (this.musicQueue.length!=0) {
+            this.musicQueue.push(res)
         }else{
 
-            this.musicList.push(res)
+            this.musicQueue.push(res)
 
             this.current.index = 0
             this.playMusic()
@@ -42,15 +65,24 @@ export class PlayerController{
     }
 
     insertMusic(res:AudioResource<unknown>){
-        this.musicList.splice(this.current.index+1, 0, res);
+        this.musicQueue.splice(this.current.index+1, 0, res);
     }
 
     insertMusicAt(res:AudioResource<unknown>,index:number){
-        this.musicList.splice(index, 0, res);
+        this.musicQueue.splice(index, 0, res);
+    }
+
+    async initBase(){
+        const base = ["/ETHCI/無損音檔/PeiYu Cheng","/ETHCI/無損音檔/jay chou","/ETHCI/無損音檔/yoasobi","/ETHCI/無損音檔/Riot Music","/ETHCI/無損音檔/鬍子男","/ETHCI/無損音檔/房东的猫《房东的猫》2017","/ETHCI/無損音檔/5、古典音乐"]
+        this.authorList.forEach(author=>{
+            if (base.includes(author.path)) {
+                this.authorQueue.push(author)
+            }
+        })
     }
 
     async playMusic(){
-        this.current.resource = this.musicList[this.current.index]
+        this.current.resource = this.musicQueue[this.current.index]
     
         try {
             this.player.play(this.current.resource)
@@ -72,7 +104,7 @@ export class PlayerController{
 
     async playNext(): Promise<audioMeta> {
 
-        if (this.current.index!=this.musicList.length-1) {
+        if (this.current.index!=this.musicQueue.length-1) {
 
             this.current.index+=1;
 
@@ -91,22 +123,34 @@ export class PlayerController{
             this.current.index-=1;
 
         }else{
-            this.current.index = this.musicList.length-1;
+            this.current.index = this.musicQueue.length-1;
         }
 
         return await this.playMusic()
     }
 
     async to(index:number): Promise<audioMeta | void> {
-        if (index>-1 && index<=this.musicList.length) {
+        if (index>-1 && index<=this.musicQueue.length) {
             this.current.index = index;
             return await this.playMusic()
         }
     }
 
+    async getSinger(){
+        
+        const data:DSMresp<DSMFiles>|undefined = await getPyfileInfo() ;
+
+        if (data) {
+            data.data.files.forEach((dir)=>{
+                this.authorList.push(dir)
+            })
+            await this.initBase()
+        } 
+    }
+
     clear(){
 
-        this.musicList = [];
+        this.musicQueue = [];
 
         this.current = {
             resource:undefined,

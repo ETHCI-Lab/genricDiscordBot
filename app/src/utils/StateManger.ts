@@ -64,6 +64,7 @@ export class StateManger{
     static setPlayer(payload:AudioPlayer){
         StateManger.info.player = payload
         this.info.playController = new PlayerController(StateManger.info.player)
+        this.info.playController.getSinger()
     }
 
     static getPlayer(){

@@ -1,85 +1,40 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CacheType, ChatInputCommandInteraction, CommandInteraction, ComponentType, EmbedBuilder, Interaction, SlashCommandStringOption, StringSelectMenuBuilder, StringSelectMenuInteraction, StringSelectMenuOptionBuilder } from "discord.js";
+import { ActionRowBuilder, AnyComponentBuilder, ButtonBuilder, ButtonStyle, CacheType, ChatInputCommandInteraction, CommandInteraction, ComponentType, EmbedBuilder, Interaction, SlashCommandStringOption, StringSelectMenuBuilder, StringSelectMenuInteraction, StringSelectMenuOptionBuilder, VoiceChannel } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
 import { getRandomPy } from "../../utils/embed/getRandomPy";
-import { getPyfileInfo } from "../../utils/music/getPyfileInfo";
-import { loginDSM } from "../../init/loginDSM";
-import { DSMFiles } from "../../interfaces/DSMFiles";
-import { DSMresp } from "../../interfaces/DSMresp";
 import { logger } from "../../utils/log";
 import { StateManger } from "../../utils/StateManger";
 import { chunkArray } from "../../utils/ChunkArray";
 import { audioMeta } from "../../interfaces/audioMeta";
 import { getPyAudio } from "../../utils/music/getPyAudio";
-import { joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
-import { musicList } from "../../interfaces/musicList";
+import { getMusics } from "../../utils/music/getMusics";
+import { createButtonRow } from "../../utils/embed/pageButton";
+import { checkConnection } from "../../utils/music/checkConnection";
 
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()
 
-const data = new SlashCommandBuilder().setName('selectmusic').setDescription('選擇培宇音樂').addStringOption((option: SlashCommandStringOption) => option.setName('author').setDescription('音樂人').setRequired(true).addChoices(
-    { name: 'peiyu', value: 'PeiYu Cheng' },
-    { name: 'jay chou', value: 'jay chou' },
-    { name: 'yoasobi', value: 'yoasobi' },
-    { name: '冷門', value: '冷門' },
-    { name: 'anime', value: 'anime' },
-    { name: 'Riot Music', value: 'Riot Music' },
-    { name: 'Lisa', value: 'Lisa' },
-    { name: '鬍子男', value: '鬍子男' },
-))
+const data = new SlashCommandBuilder().setName('selectmusic').setDescription('選擇培宇音樂')
+const controller = StateManger.getPlayController()
+let index: number = 0;
+let chunkCached: { name: string; path: string; }[][] = []
 
-
-const genList = async (choosedAuthor: string) => {
-
-    const resp: DSMresp<DSMFiles> = await getPyfileInfo(StateManger.getDSMSid() as string, StateManger.getDSMCookie() as string, choosedAuthor)
-    const chunk = chunkArray(resp.data.files, 5)
-
-    return chunk
-}
-
-
-const playPy = async (interaction: CommandInteraction, target: string, author: string) => {
-
-    const player = StateManger.getPlayer()
-    const controller = StateManger.getPlayController()
-
-    if (StateManger.getDSMSid() != undefined && StateManger.getDSMCookie() != undefined) {
-        //@ts-ignore
-        const voiceChannel: VoiceChannel = interaction.member.voice.channel
-        if (voiceChannel && interaction.guild) {
-
-            const connection = joinVoiceChannel({
-                channelId: voiceChannel.id,
-                guildId: interaction.guildId as string,
-                adapterCreator: interaction.guild.voiceAdapterCreator
-            })
-
-            connection.on("error", (error) => {
-                logger.error(error)
-            })
-
-            connection.on(VoiceConnectionStatus.Disconnected, () => {
-                logger.info("Disconnected ")
-                controller?.clear()
-            })
-
-            if (controller?.musicList.length == 0) {
-                player?.stop()
-            }
-
-            const resource = await getPyAudio(encodeURI(`/ETHCI/無損音檔/${author}/${target}`), target)
-
-            if (player && resource) {
-                connection.subscribe(player);
-                controller?.pushMusic(resource);
-            }
+const listCache = async (): Promise<{ name: string; path: string; }[][] | undefined> => {
+    if (controller && controller.currentArthor) {
+        if (controller.musicDic[controller.currentArthor.path]) {
+            return chunkArray(controller.musicDic[controller.currentArthor.path], 5)
+        } else {
+            const list = await getMusics(controller.currentArthor.path)
+            controller.musicDic[controller.currentArthor.path] = list
+            return chunkArray(list, 5)
         }
-
+    } else {
+        return undefined
     }
 }
 
 const getCurrentList = () => {
     const controller = StateManger.getPlayController()
-    const currentList = controller?.musicList
+    const currentList = controller?.musicQueue
     const currentSong = controller?.current
 
     let str = ""
@@ -96,95 +51,58 @@ const getCurrentList = () => {
     return str
 }
 
+const genAuthorSelector = (): ActionRowBuilder<AnyComponentBuilder> => {
+    const list: Array<StringSelectMenuOptionBuilder> = []
 
-const formater = async (interaction: CommandInteraction) => {
+    controller?.authorQueue.forEach((author) => {
+        const temp = new StringSelectMenuOptionBuilder()
+            .setLabel(author.name)
+            .setDescription(author.additional.size > 1024 ? `${Math.round(author.additional.size / 1024 * 100) / 100} GB` : `${author.additional.size} MB`)
+            .setValue(author.path)
 
-    let index = 0
+        list.push(temp)
+    })
 
-    let author = interaction.options.get("author")?.value as string
+    const select = new StringSelectMenuBuilder()
+        .setCustomId('author')
+        .setPlaceholder('切換音樂人')
+        .addOptions(list)
+    return new ActionRowBuilder().addComponents(select);
+}
 
-    const genmusicList = (list: musicList): ActionRowBuilder => {
-        const musicBtnsrow: Array<ButtonBuilder> = []
+const genmusicList = async (index: number, update: boolean) => {
+    if (update) {
+        const temp = await listCache()
+        if (temp) {
+            chunkCached = temp
+        }
+    }
 
-        if (list[index]) {
-            list[index].forEach((file) => {
-                musicBtnsrow.push(
-                    new ButtonBuilder()
-                        .setCustomId(file.name)
-                        .setLabel(file.name)
-                        .setStyle(ButtonStyle.Secondary)
-                )
-            })
-        } else {
+    const musicBtnsrow: Array<ButtonBuilder> = []
+
+    if (chunkCached[index]) {
+        chunkCached[index].forEach((file) => {
             musicBtnsrow.push(
                 new ButtonBuilder()
-                    .setCustomId("當前音樂人沒有資料")
-                    .setLabel("當前音樂人沒有資料")
+                    .setCustomId(file.name)
+                    .setLabel(file.name)
                     .setStyle(ButtonStyle.Secondary)
             )
-        }
-
-        return new ActionRowBuilder().addComponents(musicBtnsrow);
+        })
+    } else {
+        musicBtnsrow.push(
+            new ButtonBuilder()
+                .setCustomId("當前音樂人沒有資料")
+                .setLabel("當前音樂人沒有資料")
+                .setStyle(ButtonStyle.Secondary)
+        )
     }
 
-    const genAuthorSelector = () => {
-        const select = new StringSelectMenuBuilder()
-            .setCustomId('author')
-            .setPlaceholder('切換音樂人')
-            .addOptions(
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('鄭培宇')
-                    .setDescription('鄭培宇')
-                    .setValue('PeiYu Cheng'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('周杰倫')
-                    .setDescription('周杰倫')
-                    .setValue('jay chou'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('yoasobi')
-                    .setDescription('yoasobi')
-                    .setValue('yoasobi'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('冷門')
-                    .setDescription('冷門')
-                    .setValue('冷門'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('anime')
-                    .setDescription('anime')
-                    .setValue('anime'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Riot Music')
-                    .setDescription('Riot Music')
-                    .setValue('Riot Music'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Lisa')
-                    .setDescription('Lisa')
-                    .setValue('Lisa'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('鬍子男')
-                    .setDescription('鬍子男')
-                    .setValue('鬍子男'),
-            )
-        return new ActionRowBuilder().addComponents(select);
-    }
+    return new ActionRowBuilder().addComponents(musicBtnsrow);
+}
 
-
-    const createButtonRow = (): ActionRowBuilder => {
-        const nextPageBtn = new ButtonBuilder()
-            .setCustomId('nextPage')
-            .setLabel('Next Page')
-            .setStyle(ButtonStyle.Secondary);
-
-        const prvPageBtn = new ButtonBuilder()
-            .setCustomId('prvPage')
-            .setLabel('Previous Page')
-            .setStyle(ButtonStyle.Secondary);
-
-        return new ActionRowBuilder().addComponents(prvPageBtn, nextPageBtn);
-    };
-
-    const updateResponse = async (list: musicList) => {
-
+const updateResponse = async (interaction: CommandInteraction,update:boolean) => {
+    if (controller) {
         const resp = new EmbedBuilder()
             .setColor(0x212121)
             .setTitle('當前撥放器音樂表')
@@ -192,7 +110,7 @@ const formater = async (interaction: CommandInteraction) => {
             .setThumbnail(getRandomPy())
             .setTimestamp()
             .setFields(
-                { name: "當前音樂人", value: author, inline: false },
+                { name: "當前音樂人", value: controller.currentArthor ? controller.currentArthor.name : "未選擇", inline: false },
                 { name: "音樂表", value: getCurrentList() == "" ? "當前列表空白" : getCurrentList(), inline: true }
             )
 
@@ -200,57 +118,83 @@ const formater = async (interaction: CommandInteraction) => {
         return await interaction.editReply({
             embeds: [resp],
             //@ts-ignore
-            components: [genAuthorSelector(), genmusicList(list), createButtonRow()],
+            components: [genAuthorSelector(), await genmusicList(index,update),createButtonRow()],
         });
-    };
+    }else{
+        return await interaction.editReply("500: server error");
+    }
+}
 
-    const list = await genList(author)
+const playPy = async (interaction: CommandInteraction,target: string, author: string) => {
 
-    const response = await updateResponse(list)
+    const player = StateManger.getPlayer()
+    const controller = StateManger.getPlayController()
 
-    // 收集按鈕互動
-    const collectorFilter = (i: { user: { id: string } }) => i.user.id === interaction.user.id;
-    const collector = response.createMessageComponentCollector({ filter: collectorFilter, time: 3_600_000 });
+    await checkConnection(interaction)
 
-    collector.on('collect', async (i) => {
-
-        // 確保回應用戶的交互
-        await i.deferUpdate();
-
-        try {
-            let newlist
-
-            if (i.customId === 'author') {
-
-                //@ts-ignore
-                const interaction: StringSelectMenuInteraction<CacheType> = i
-                author = interaction.values[0]
-
-            } else if (i.customId === 'nextPage') {
-
-                newlist = await genList(author)
-
-                index = (index + 1) % newlist.length;
-
-            } else if (i.customId === 'prvPage') {
-
-                newlist = await genList(author)
-
-                index = (index - 1 + newlist.length) % newlist.length;
-
-            } else {
-                if (i.customId != "當前音樂人沒有資料") {
-                    await playPy(interaction, i.customId, author)
-                }
-            }
-
-            newlist = await genList(author)
-            await updateResponse(newlist);
-        } catch (error) {
-            logger.info(`select: ${error}`)
+    if (StateManger.getDSMSid() != undefined && StateManger.getDSMCookie() != undefined) {
+        const path = author.replace("/volume1","")
+        const resource = await getPyAudio(encodeURI(author.startsWith("/volume")?path:author), target)
+        if (player && resource) {
+            controller?.pushMusic(resource);
         }
-    });
+    }
+}
 
+const render = async (interaction: CommandInteraction) => {
+    if (controller) {
+        let update = false
+        const response = await updateResponse(interaction,update)
+
+        // 收集按鈕互動
+        const collectorFilter = (i: { user: { id: string } }) => i.user.id === interaction.user.id;
+        const collector = response.createMessageComponentCollector({ filter: collectorFilter, time: 3_600_000 });
+    
+        collector.on('collect', async (i) => {
+    
+            // 確保回應用戶的交互
+            await i.deferUpdate();
+    
+            try {
+                if (i.customId === 'author') {
+    
+                    //@ts-ignore
+                    const interaction: StringSelectMenuInteraction<CacheType> = i
+                    controller.authorQueue.forEach(author=>{
+                        if (author.path == interaction.values[0]) {
+                            controller.currentArthor = author
+                            index = 0
+                        }
+                    })
+                    update = true
+    
+                } else if (i.customId === 'nextPage') {
+    
+                    index = (index + 1) % chunkCached.length;
+    
+                } else if (i.customId === 'prvPage') {
+    
+                    index = (index - 1 + chunkCached.length) % chunkCached.length;
+    
+                } else {
+                    if (i.customId != "當前音樂人沒有資料") {
+                        if (controller.currentArthor) {
+                            chunkCached[index].forEach(async (music)=>{
+                                if (music.name == i.customId) {
+                                    await playPy(interaction,i.customId, music.path)   
+                                }
+                            })
+                            
+                        }
+                    }
+                }
+
+                await updateResponse(interaction,update);
+            } catch (error) {
+                logger.info(`select: ${error}`)
+            }
+        });
+    }
 }
 
 const getpy = async (interaction: CommandInteraction) => {
@@ -261,7 +205,7 @@ const getpy = async (interaction: CommandInteraction) => {
     await interaction.deferReply();
 
     if (StateManger.getDSMSid() != undefined && StateManger.getDSMCookie() != undefined) {
-        await formater(interaction)
+        await render(interaction)
     } else {
         await interaction.editReply("登入失敗");
     }
