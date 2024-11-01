@@ -1,4 +1,4 @@
-import { AudioResource,AudioPlayer,AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior } from '@discordjs/voice';
+import { AudioResource,AudioPlayer,AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior, VoiceConnection } from '@discordjs/voice';
 import { logger } from '../log';
 import {audioMeta} from "../../interfaces/audioMeta"
 import { asyncPost } from '../fetch';
@@ -16,7 +16,15 @@ export class PlayerController{
 
     public musicQueue:Array<AudioResource<unknown>>;
 
-    public musicList:Dic<Array<{name:string,path:string}>>;
+    public authorQueue:Array<DSMFile>;
+
+    public currentArthor:DSMFile|undefined;
+
+    public authorList:Array<DSMFile>;
+
+    public musicDic:Dic<Array<{name:string,path:string}>>;
+
+    public connection:VoiceConnection|undefined ;
 
 
     public player:AudioPlayer;
@@ -28,7 +36,9 @@ export class PlayerController{
 
     constructor(player:AudioPlayer){
         this.musicQueue = [];
-        this.musicList = {}
+        this.authorList = [];
+        this.authorQueue = [];
+        this.musicDic = {};
         this.player = player;
         this.current = {
             resource:undefined,
@@ -60,6 +70,15 @@ export class PlayerController{
 
     insertMusicAt(res:AudioResource<unknown>,index:number){
         this.musicQueue.splice(index, 0, res);
+    }
+
+    async initBase(){
+        const base = ["/ETHCI/無損音檔/PeiYu Cheng","/ETHCI/無損音檔/jay chou","/ETHCI/無損音檔/yoasobi","/ETHCI/無損音檔/Riot Music","/ETHCI/無損音檔/鬍子男","/ETHCI/無損音檔/房东的猫《房东的猫》2017","/ETHCI/無損音檔/5、古典音乐"]
+        this.authorList.forEach(author=>{
+            if (base.includes(author.path)) {
+                this.authorQueue.push(author)
+            }
+        })
     }
 
     async playMusic(){
@@ -122,14 +141,11 @@ export class PlayerController{
         const data:DSMresp<DSMFiles>|undefined = await getPyfileInfo() ;
 
         if (data) {
-            await Promise.all(data.data.files.map(async (dir)=>{
-                const list = await getMusics(dir.path)
-                this.musicList[dir.path] = list
-            }))
-
+            data.data.files.forEach((dir)=>{
+                this.authorList.push(dir)
+            })
+            await this.initBase()
         } 
-
-        appendFileSync("../test3.json",JSON.stringify(this.musicList))
     }
 
     clear(){

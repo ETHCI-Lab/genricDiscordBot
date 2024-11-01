@@ -22,7 +22,5 @@ export const getMusics = async (path: string) => {
     }
 
     await findMusicFiles(path.replace("/ETHCI/無損音檔/",""))
-    // console.log(path)
-    // console.log(musicFiles.length)
     return musicFiles
 }

@@ -1,43 +1,58 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, CommandInteraction, ComponentType, EmbedBuilder, Interaction, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
+import { ActionRowBuilder, AnyComponentBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, CommandInteraction, ComponentType, EmbedBuilder, Interaction, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
 import { CommandInfo } from "../../interfaces/CommandInfo";
 import { getRandomPy } from "../../utils/embed/getRandomPy";
-import { getPyfileInfo } from "../../utils/music/getPyfileInfo";
-import { loginDSM } from "../../init/loginDSM";
-import { DSMFiles } from "../../interfaces/DSMFiles";
-import { DSMresp } from "../../interfaces/DSMresp";
-import { logger } from "../../utils/log";
 import { StateManger } from "../../utils/StateManger";
 import { chunkArray } from "../../utils/ChunkArray";
+import { DSMFile } from "../../interfaces/DSMFile";
 
 const { SlashCommandBuilder } = require('discord.js');
 require('dotenv').config()
 
-const data = new SlashCommandBuilder().setName('pymusic').setDescription('查培宇音樂')
+const data = new SlashCommandBuilder().setName('pymusic').setDescription('添加/查詢 當前加載音樂目錄')
 
+const genAuthorSelector = (list: DSMFile[], index: number): ActionRowBuilder<AnyComponentBuilder> => {
+    const auhorList: Array<StringSelectMenuOptionBuilder> = []
 
-const formater = async (info: DSMresp<DSMFiles>, interaction: CommandInteraction) => {
+    list.forEach((file) => {
+        const temp = new StringSelectMenuOptionBuilder()
+            .setLabel(`${file.additional.owner.user}: ${file.name}`)
+            .setDescription(file.additional.size > 1024 ? `${Math.round(file.additional.size / 1024 * 100) / 100} GB` : `${file.additional.size} MB`)
+            .setValue(file.path)
 
-    let index = 0
-
-    const list = chunkArray(info.data.files, 5);
-
-    const args: Array<Array<{ name: string, value: any, inline: boolean }>> = []
-
-    list.forEach(sublist => {
-
-        let temp: Array<{ name: string, value: any, inline: boolean }> = []
-
-        sublist.forEach(file => {
-            temp.push({
-                name: `${info.data.files.indexOf(file)+1}: ${file.name}`,
-                value: `大小: ${Math.round(file.additional.size/1048576)} MB`,
-                inline: false
-            })
-        })
-
-        args.push(temp)
-
+        auhorList.push(temp)
     })
+
+    const select = new StringSelectMenuBuilder()
+        .setCustomId('author')
+        .setPlaceholder('添加目錄')
+        .addOptions(auhorList)
+    return new ActionRowBuilder().addComponents(select);
+}
+
+const formater = async (info: DSMFile[], interaction: CommandInteraction) => {
+
+    let index = 0;
+
+    const list = chunkArray(info, 5);
+    const controller = StateManger.getPlayController();
+
+    const genList =()=>{
+        const authorQueue = controller?.authorQueue
+
+        const args: Array<{ name: string, value: any, inline: boolean }> = []
+    
+        if (authorQueue) {
+            authorQueue.forEach(author => {
+                args.push({
+                    name: `${author.additional.owner.user}: ${author.name}`,
+                    value: author.additional.size > 1024 ? `${Math.round(author.additional.size / 1024 * 100) / 100} GB` : `${author.additional.size} MB`,
+                    inline: false
+                })
+            })
+        }
+
+        return args
+    }
 
     const createButtonRow = () => {
         const nextPageBtn = new ButtonBuilder()
@@ -57,14 +72,16 @@ const formater = async (info: DSMresp<DSMFiles>, interaction: CommandInteraction
         const resp = new EmbedBuilder()
             .setColor(0x212121)
             .setTitle(`培宇音樂表 (${index + 1}/${list.length})`)
-            .setAuthor({ name: 'CWL機器人', iconURL: getRandomPy() })
+            .setAuthor({ name: 'PYC機器人', iconURL: getRandomPy() })
+            .setDescription(`當前加載資料夾: ${controller?.authorQueue ? controller?.authorQueue.length : 0} 個`)
             .setThumbnail(getRandomPy())
             .setTimestamp()
-            .addFields(args[index]);
+            .addFields(genList());
 
         return await interaction.editReply({
             embeds: [resp],
-            components: [createButtonRow()],
+            //@ts-ignore
+            components: [genAuthorSelector(list[index]), createButtonRow()],
         });
     };
 
@@ -83,6 +100,15 @@ const formater = async (info: DSMresp<DSMFiles>, interaction: CommandInteraction
             index = (index + 1) % list.length;
         } else if (i.customId === 'prvPage') {
             index = (index - 1 + list.length) % list.length;
+        } else if (i.customId === 'author') {
+            //@ts-ignore
+            const interaction: StringSelectMenuInteraction<CacheType> = i
+            list[index].forEach(author=>{
+                if (author.path == interaction.values[0]) {
+                    controller?.authorQueue?.push(author)
+                }
+            })
+            
         }
 
         await updateResponse();
@@ -96,25 +122,11 @@ const getpy = async (interaction: CommandInteraction) => {
      * 延遲回應
      */
     await interaction.deferReply();
-    const musiclist: Array<{ name: string, value: string }> = []
-    const list = await getPyfileInfo("PeiYu Cheng")
+
+    const list = StateManger.getPlayController()?.authorList
 
     if (list) {
-        list.data.files.forEach(file => {
-            musiclist.push({
-                name: file.name,
-                value: file.name
-            })
-        })
-
         formater(list, interaction)
-    }else{
-        await interaction.editReply("登入失敗");
-
-        await loginDSM({
-            name: process.env.SynnologyDsmUserName as string,
-            password: process.env.SynnologyDsmPassword as string
-        });
     }
 
 }

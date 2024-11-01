@@ -45,7 +45,7 @@ const getpy = async (interaction: CommandInteraction) => {
      */
     await interaction.deferReply();
     const controller = StateManger.getPlayController()
-    const list = controller?.musicList
+    const list = controller?.musicQueue
     await interaction.editReply({ embeds: [formater(list)] });
 }
 
