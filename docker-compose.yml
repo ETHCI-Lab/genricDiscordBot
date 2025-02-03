@@ -2,6 +2,7 @@ version: '3'  # 使用適合的版本
 
 services:
   app:
+    image: genricethcidiscordbot
     build:
       context: .  # 指定 Dockerfile 所在的上下文目錄
       dockerfile: Dockerfile  # (可選) 如果 Dockerfile 的名稱不為 Dockerfile，可以指定

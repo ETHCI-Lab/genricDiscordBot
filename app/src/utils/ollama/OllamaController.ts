@@ -25,7 +25,7 @@ export class OllamaController {
         this.mem = {}
         this.toolDic = {}
         this.toolInfoDic = {}
-        this.model = "mannix/llama3-groq-tool-8b:latest"
+        this.model = "MFDoom/deepseek-r1-tool-calling:14b"
         this.replyMode = "await"
         
         this.client = new Ollama({
@@ -50,6 +50,7 @@ export class OllamaController {
         return this.mem[session]
     }
 
+    
     initTool(){
         toolRoutes.forEach(tool=>{
             this.toolDic[tool.id] = tool.excute

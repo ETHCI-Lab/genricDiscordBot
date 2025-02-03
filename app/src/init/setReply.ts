@@ -36,7 +36,7 @@ export const setReply = (client: Client) => {
                             }
                             break;
                         case "await":
-                            llamaResp = await controller.sendChat(interaction.content, channelId, tools, "mannix/llama3-groq-tool-8b:latest");
+                            llamaResp = await controller.sendChat(interaction.content, channelId, tools, "MFDoom/deepseek-r1-tool-calling:14b");
                             if (llamaResp) {
 
                                 let temp = ""
